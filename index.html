@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataGen</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .loading { display: none; }
+        .preview-table { max-height: 400px; overflow-y: auto; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="text-center mb-4">DataGen</h1>
+                <p class="text-center text-muted mb-4">Generate structured CSV data using AI</p>
+            </div>
+        </div>
+
+        <!-- System Prompt Section -->
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">System Prompt</h5>
+                        <textarea class="form-control" id="systemPrompt" rows="4" placeholder="Enter system prompt for the LLM...">You are a data generation assistant. Generate realistic and diverse data based on the provided row and column specifications. The user may provide either specific headers to use exactly, or descriptions of what they want - in which case you should create appropriate headers. Return the data in CSV format with proper headers. Make sure the data is coherent and follows logical patterns. Do not include any explanations, just return the raw CSV data.</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Row Headers</h5>
+                        <small class="text-muted">Provide specific headers (one per line) OR describe what rows you want</small>
+                        <textarea class="form-control mt-2" id="rowHeaders" rows="6" placeholder="Specific headers:&#10;iPhone 15&#10;Samsung Galaxy S24&#10;Google Pixel 8&#10;&#10;OR description:&#10;5 popular smartphone models"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Column Headers</h5>
+                        <small class="text-muted">Provide specific headers (one per line) OR describe what columns you want</small>
+                        <textarea class="form-control mt-2" id="columnHeaders" rows="6" placeholder="Specific headers:&#10;Category&#10;Price&#10;Rating&#10;Storage&#10;Brand&#10;&#10;OR description:&#10;Product specifications and details"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Generate Button -->
+        <div class="row mb-3">
+            <div class="col-12 text-center">
+                <button id="generateBtn" class="btn btn-primary me-3">Generate Data</button>
+                <button id="downloadBtn" class="btn btn-success" disabled>Download CSV</button>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="row loading" id="loadingIndicator">
+            <div class="col-12 text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Generating data...</p>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Data Preview</h5>
+                        <div id="csvPreview" class="preview-table">
+                            <p class="text-muted text-center py-4">Generated CSV data will appear here...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js" type="module"></script>
+</body>
+</html>
