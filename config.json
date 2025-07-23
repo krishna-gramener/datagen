@@ -1,0 +1,402 @@
+{
+  "retail": {
+    "name": "Retail",
+    "type": "industry",
+    "valueChain": [
+      "Sourcing & Procurement",
+      "Inventory Management",
+      "Marketing & Promotion",
+      "Sales & Customer Service",
+      "Order Fulfillment",
+      "Customer Analytics"
+    ],
+    "useCases": {
+      "Sourcing & Procurement": [
+        "Supplier Risk Assessment",
+        "Contract Analysis",
+        "Price Optimization",
+        "Quality Prediction"
+      ],
+      "Inventory Management": [
+        "Demand Forecasting",
+        "Stock Optimization",
+        "Automated Reordering",
+        "Waste Reduction"
+      ],
+      "Marketing & Promotion": [
+        "Content Generation",
+        "Customer Segmentation",
+        "Campaign Optimization",
+        "Personalized Offers"
+      ],
+      "Sales & Customer Service": [
+        "Chatbot Support",
+        "Sales Recommendations",
+        "Sentiment Analysis",
+        "Return Processing"
+      ],
+      "Order Fulfillment": [
+        "Route Optimization",
+        "Delivery Prediction",
+        "Packaging Optimization",
+        "Exception Handling"
+      ],
+      "Customer Analytics": [
+        "Behavior Analysis",
+        "Lifetime Value Prediction",
+        "Churn Prevention",
+        "Market Insights"
+      ]
+    }
+  },
+  "manufacturing": {
+    "name": "Manufacturing",
+    "type": "industry",
+    "valueChain": [
+      "Product Design",
+      "Supply Chain Planning",
+      "Production Planning",
+      "Manufacturing Operations",
+      "Quality Control",
+      "Distribution & Logistics"
+    ],
+    "useCases": {
+      "Product Design": [
+        "Design Optimization",
+        "Material Selection",
+        "Prototype Analysis",
+        "CAD Enhancement"
+      ],
+      "Supply Chain Planning": [
+        "Supplier Selection",
+        "Risk Assessment",
+        "Demand Planning",
+        "Inventory Optimization"
+      ],
+      "Production Planning": [
+        "Capacity Planning",
+        "Schedule Optimization",
+        "Resource Allocation",
+        "Bottleneck Identification"
+      ],
+      "Manufacturing Operations": [
+        "Predictive Maintenance",
+        "Process Optimization",
+        "Energy Management",
+        "Worker Safety"
+      ],
+      "Quality Control": [
+        "Defect Detection",
+        "Quality Prediction",
+        "Root Cause Analysis",
+        "Compliance Monitoring"
+      ],
+      "Distribution & Logistics": [
+        "Route Optimization",
+        "Warehouse Management",
+        "Delivery Tracking",
+        "Cost Optimization"
+      ]
+    }
+  },
+  "financial-services": {
+    "name": "Financial Services",
+    "type": "industry",
+    "valueChain": [
+      "Customer Acquisition",
+      "Risk Assessment",
+      "Product Development",
+      "Transaction Processing",
+      "Customer Service",
+      "Compliance & Reporting"
+    ],
+    "useCases": {
+      "Customer Acquisition": [
+        "Lead Scoring",
+        "Marketing Personalization",
+        "Credit Evaluation",
+        "Onboarding Automation"
+      ],
+      "Risk Assessment": [
+        "Fraud Detection",
+        "Credit Risk Modeling",
+        "Market Risk Analysis",
+        "Regulatory Compliance"
+      ],
+      "Product Development": [
+        "Product Recommendation",
+        "Pricing Optimization",
+        "Feature Analysis",
+        "Market Research"
+      ],
+      "Transaction Processing": [
+        "Payment Processing",
+        "Transaction Monitoring",
+        "Reconciliation Automation",
+        "Error Detection"
+      ],
+      "Customer Service": [
+        "Chatbot Support",
+        "Query Resolution",
+        "Complaint Analysis",
+        "Service Personalization"
+      ],
+      "Compliance & Reporting": [
+        "Regulatory Reporting",
+        "Audit Automation",
+        "Policy Monitoring",
+        "Risk Documentation"
+      ]
+    }
+  },
+  "healthcare": {
+    "name": "Healthcare",
+    "type": "industry",
+    "valueChain": [
+      "Patient Registration",
+      "Diagnosis & Treatment",
+      "Care Coordination",
+      "Medical Records",
+      "Billing & Insurance",
+      "Research & Development"
+    ],
+    "useCases": {
+      "Patient Registration": [
+        "Appointment Scheduling",
+        "Insurance Verification",
+        "Patient Screening",
+        "Registration Automation"
+      ],
+      "Diagnosis & Treatment": [
+        "Medical Imaging Analysis",
+        "Symptom Assessment",
+        "Treatment Recommendations",
+        "Drug Interaction Checks"
+      ],
+      "Care Coordination": [
+        "Care Plan Generation",
+        "Provider Communication",
+        "Patient Monitoring",
+        "Discharge Planning"
+      ],
+      "Medical Records": [
+        "Clinical Documentation",
+        "Record Summarization",
+        "Data Extraction",
+        "Privacy Protection"
+      ],
+      "Billing & Insurance": [
+        "Claims Processing",
+        "Coding Automation",
+        "Payment Prediction",
+        "Fraud Detection"
+      ],
+      "Research & Development": [
+        "Clinical Trial Matching",
+        "Literature Review",
+        "Drug Discovery",
+        "Outcome Prediction"
+      ]
+    }
+  },
+  "customer-support": {
+    "name": "Customer Support",
+    "type": "function",
+    "valueChain": [
+      "Inquiry Reception",
+      "Issue Classification",
+      "Problem Resolution",
+      "Escalation Management",
+      "Follow-up & Feedback",
+      "Knowledge Management"
+    ],
+    "useCases": {
+      "Inquiry Reception": [
+        "Multi-channel Integration",
+        "Language Detection",
+        "Intent Recognition",
+        "Priority Assignment"
+      ],
+      "Issue Classification": [
+        "Automated Categorization",
+        "Severity Assessment",
+        "Skill-based Routing",
+        "SLA Determination"
+      ],
+      "Problem Resolution": [
+        "Solution Recommendation",
+        "Troubleshooting Guidance",
+        "Knowledge Retrieval",
+        "Response Generation"
+      ],
+      "Escalation Management": [
+        "Escalation Triggers",
+        "Expert Identification",
+        "Context Transfer",
+        "Resolution Tracking"
+      ],
+      "Follow-up & Feedback": [
+        "Satisfaction Surveys",
+        "Sentiment Analysis",
+        "Follow-up Scheduling",
+        "Feedback Processing"
+      ],
+      "Knowledge Management": [
+        "Article Generation",
+        "Content Updates",
+        "Search Optimization",
+        "Gap Identification"
+      ]
+    }
+  },
+  "hr": {
+    "name": "Human Resources",
+    "type": "function",
+    "valueChain": [
+      "Talent Acquisition",
+      "Employee Onboarding",
+      "Performance Management",
+      "Learning & Development",
+      "Employee Relations",
+      "Compliance & Analytics"
+    ],
+    "useCases": {
+      "Talent Acquisition": [
+        "Resume Screening",
+        "Candidate Matching",
+        "Interview Scheduling",
+        "Reference Checking"
+      ],
+      "Employee Onboarding": [
+        "Document Processing",
+        "Training Personalization",
+        "Progress Tracking",
+        "Buddy Matching"
+      ],
+      "Performance Management": [
+        "Goal Setting",
+        "Performance Prediction",
+        "Feedback Analysis",
+        "Career Planning"
+      ],
+      "Learning & Development": [
+        "Skill Gap Analysis",
+        "Course Recommendations",
+        "Learning Path Creation",
+        "Progress Monitoring"
+      ],
+      "Employee Relations": [
+        "Sentiment Monitoring",
+        "Conflict Resolution",
+        "Policy Clarification",
+        "Engagement Surveys"
+      ],
+      "Compliance & Analytics": [
+        "Policy Monitoring",
+        "Diversity Analytics",
+        "Turnover Prediction",
+        "Compensation Analysis"
+      ]
+    }
+  },
+  "it": {
+    "name": "Information Technology",
+    "type": "function",
+    "valueChain": [
+      "Infrastructure Management",
+      "Application Development",
+      "Security Operations",
+      "Data Management",
+      "User Support",
+      "Strategic Planning"
+    ],
+    "useCases": {
+      "Infrastructure Management": [
+        "System Monitoring",
+        "Capacity Planning",
+        "Incident Response",
+        "Performance Optimization"
+      ],
+      "Application Development": [
+        "Code Generation",
+        "Testing Automation",
+        "Documentation Creation",
+        "Bug Detection"
+      ],
+      "Security Operations": [
+        "Threat Detection",
+        "Vulnerability Assessment",
+        "Incident Analysis",
+        "Compliance Monitoring"
+      ],
+      "Data Management": [
+        "Data Quality Assessment",
+        "Backup Optimization",
+        "Migration Planning",
+        "Analytics Automation"
+      ],
+      "User Support": [
+        "Ticket Classification",
+        "Solution Recommendation",
+        "User Training",
+        "FAQ Generation"
+      ],
+      "Strategic Planning": [
+        "Technology Assessment",
+        "ROI Analysis",
+        "Roadmap Planning",
+        "Vendor Evaluation"
+      ]
+    }
+  },
+  "marketing": {
+    "name": "Marketing",
+    "type": "function",
+    "valueChain": [
+      "Market Research",
+      "Content Creation",
+      "Campaign Management",
+      "Lead Generation",
+      "Customer Engagement",
+      "Performance Analytics"
+    ],
+    "useCases": {
+      "Market Research": [
+        "Competitor Analysis",
+        "Trend Identification",
+        "Customer Insights",
+        "Market Segmentation"
+      ],
+      "Content Creation": [
+        "Copy Generation",
+        "Visual Content",
+        "Personalization",
+        "A/B Testing"
+      ],
+      "Campaign Management": [
+        "Campaign Optimization",
+        "Budget Allocation",
+        "Channel Selection",
+        "Timing Optimization"
+      ],
+      "Lead Generation": [
+        "Lead Scoring",
+        "Prospect Identification",
+        "Contact Enrichment",
+        "Qualification Automation"
+      ],
+      "Customer Engagement": [
+        "Email Personalization",
+        "Social Media Management",
+        "Chatbot Interactions",
+        "Event Recommendations"
+      ],
+      "Performance Analytics": [
+        "Attribution Modeling",
+        "ROI Calculation",
+        "Customer Journey Mapping",
+        "Predictive Analytics"
+      ]
+    }
+  }
+}

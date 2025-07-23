@@ -1,5 +1,13 @@
 let token = null;
 
+// LLM Use Case Explorer variables
+let currentConfig = null;
+let currentSelection = null;
+let chatSessions = {};
+let currentUseCaseId = null;
+let configData = null;
+let isUseCaseMode = false;
+
 async function callLLM(systemPrompt, userMessage) {
   try {
     const response = await fetch("https://llmfoundry.straive.com/openai/v1/chat/completions", {
@@ -30,27 +38,40 @@ async function callLLM(systemPrompt, userMessage) {
 
 async function init() {
   try {
+    // Check if we're in use case mode by looking for specific elements
+    isUseCaseMode = document.getElementById('industrySelect') !== null;
+    
+    // Always hide loading spinner first
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    if (loadingSpinner) {
+      loadingSpinner.style.display = 'none';
+    }
+    
     // Get API token
     const response = await fetch("https://llmfoundry.straive.com/token", { credentials: "include" });
     const data = await response.json();
     token = data.token;
+    
+    if (isUseCaseMode) {
+      await loadConfigData();
+    }
   } catch (error) {
     console.error('Initialization error:', error);
-    alert('Failed to initialize application: ' + error.message);
+    // Hide loading spinner even on error
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    if (loadingSpinner) {
+      loadingSpinner.style.display = 'none';
+    }
+    showAlert('Failed to initialize application: ' + error.message, 'danger');
   }
 }
 
-// Global variable to store CSV data
-let csvData = '';
 
 function initializeEventListeners() {
-    document.getElementById('generateBtn').addEventListener('click', generateData);
-    document.getElementById('downloadBtn').addEventListener('click', downloadCSV);
-    
-    // Auto-save inputs
-    ['systemPrompt', 'rowHeaders', 'columnHeaders'].forEach(id => {
-        document.getElementById(id).addEventListener('input', saveInputs);
-    });
+    if (isUseCaseMode) {
+        setupUseCaseEventListeners();
+    }
+    // Removed CSV data generation functionality
 }
 
 function saveInputs() {
@@ -94,221 +115,392 @@ function validateInputs() {
     return true;
 }
 
-async function generateData() {
-    if (!validateInputs()) return;
-
-    const generateBtn = document.getElementById('generateBtn');
-    const loadingIndicator = document.getElementById('loadingIndicator');
+// CSV data generation functions removed - focusing only on LLM Use Case Explorer
+document.addEventListener('DOMContentLoaded', async () => {
+    // Ensure loading spinner is hidden immediately
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    if (loadingSpinner) {
+        loadingSpinner.style.display = 'none';
+    }
     
-    // Show loading state
-    generateBtn.disabled = true;
-    loadingIndicator.style.display = 'block';
+    await init();
+    initializeEventListeners();
+    
+    // Double-check loading spinner is hidden after init
+    if (loadingSpinner) {
+        loadingSpinner.style.display = 'none';
+    }
+});
 
+// Removed CSV example data loading
+
+// ===== LLM USE CASE EXPLORER FUNCTIONS =====
+
+// Load configuration data
+async function loadConfigData() {
     try {
-        const systemPrompt = document.getElementById('systemPrompt').value;
-        const rowHeadersInput = document.getElementById('rowHeaders').value.trim();
-        const columnHeadersInput = document.getElementById('columnHeaders').value.trim();
-
-        const userMessage = buildUserMessage(rowHeadersInput, columnHeadersInput);
-        
-        const csvContent = await callLLM(systemPrompt, userMessage);
-        
-        // Clean up the CSV content (remove code blocks if present)
-        csvData = csvContent.replace(/```csv\n?/g, '').replace(/```\n?/g, '').trim();
-        
-        displayPreview(csvData);
-        document.getElementById('downloadBtn').disabled = false;
-        showAlert('Data generated successfully!', 'success');
-
-    } catch (error) {
-        showAlert(`Error: ${error.message}`, 'danger');
-    } finally {
-        generateBtn.disabled = false;
-        loadingIndicator.style.display = 'none';
-    }
-}
-
-function buildUserMessage(rowHeadersInput, columnHeadersInput) {
-    // Check if input looks like specific headers (multiple lines) or description (single concept)
-    const rowLines = rowHeadersInput.split('\n').filter(h => h.trim());
-    const columnLines = columnHeadersInput.split('\n').filter(h => h.trim());
-    
-    const isRowSpecific = rowLines.length > 1 || rowLines[0]?.includes(',');
-    const isColumnSpecific = columnLines.length > 1 || columnLines[0]?.includes(',');
-    
-    let message = '';
-    
-    if (isRowSpecific) {
-        message += `Row Headers (use these exactly): ${rowLines.join(', ')}\n`;
-    } else {
-        message += `Row Requirements: ${rowHeadersInput}\n`;
-    }
-    
-    if (isColumnSpecific) {
-        message += `Column Headers (use these exactly): ${columnLines.join(', ')}\n`;
-    } else {
-        message += `Column Requirements: ${columnHeadersInput}\n`;
-    }
-    
-    message += `\nGenerate a CSV with appropriate headers and realistic data. If specific headers were provided, use them exactly. If requirements were given, create suitable headers that fulfill those requirements. The first row should contain the column headers, followed by data rows.`;
-    
-    return message;
-}
-
-
-
-function displayPreview(data) {
-    const previewDiv = document.getElementById('csvPreview');
-    
-    try {
-        const rows = data.split('\n').filter(row => row.trim());
-        
-        if (rows.length === 0) {
-            previewDiv.innerHTML = '<p class="text-muted">No data to display</p>';
-            return;
+        const response = await fetch('config.json');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
-
-        let tableHTML = '<div class="table-responsive"><table class="table table-striped table-hover">';
-        
-        rows.forEach((row, index) => {
-            const cells = parseCSVRow(row);
-            
-            if (index === 0) {
-                // Header row
-                tableHTML += '<thead class="table-dark"><tr>';
-                cells.forEach(cell => {
-                    tableHTML += `<th scope="col">${escapeHtml(cell)}</th>`;
-                });
-                tableHTML += '</tr></thead><tbody>';
-            } else {
-                // Data rows
-                tableHTML += '<tr>';
-                cells.forEach(cell => {
-                    tableHTML += `<td>${escapeHtml(cell)}</td>`;
-                });
-                tableHTML += '</tr>';
-            }
-        });
-        
-        tableHTML += '</tbody></table></div>';
-        previewDiv.innerHTML = tableHTML;
-
+        configData = await response.json();
+        console.log('Config data loaded successfully', configData);
     } catch (error) {
-        previewDiv.innerHTML = `<div class="alert alert-warning">
-            <strong>Preview Error:</strong> Could not parse CSV data properly. You can still download the raw data.
-            <details class="mt-2">
-                <summary>Raw Data</summary>
-                <pre class="mt-2">${escapeHtml(data)}</pre>
-            </details>
-        </div>`;
+        console.error('Error loading config data:', error);
+        // Set empty config data as fallback
+        configData = {};
+        console.log('Using empty config data as fallback');
     }
 }
 
-function parseCSVRow(row) {
-    const cells = [];
-    let current = '';
-    let inQuotes = false;
+// Setup event listeners for use case mode
+function setupUseCaseEventListeners() {
+    // Generate button
+    document.getElementById('generateBtn').addEventListener('click', generateValueChain);
     
-    for (let i = 0; i < row.length; i++) {
-        const char = row[i];
-        
-        if (char === '"') {
-            if (inQuotes && row[i + 1] === '"') {
-                current += '"';
-                i++; // Skip next quote
-            } else {
-                inQuotes = !inQuotes;
-            }
-        } else if (char === ',' && !inQuotes) {
-            cells.push(current.trim());
-            current = '';
-        } else {
-            current += char;
+    // Back button
+    document.getElementById('backBtn').addEventListener('click', goBack);
+    
+    // Export/Import buttons
+    document.getElementById('exportBtn').addEventListener('click', exportConfiguration);
+    document.getElementById('importBtn').addEventListener('click', () => {
+        document.getElementById('importFile').click();
+    });
+    document.getElementById('importFile').addEventListener('change', importConfiguration);
+    
+    // Modal chat functionality
+    document.getElementById('sendChatBtn').addEventListener('click', sendChatMessage);
+    
+    // Custom input enter key
+    document.getElementById('customInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            generateValueChain();
         }
-    }
+    });
     
-    cells.push(current.trim());
-    return cells;
+    // Dropdown selection
+    document.getElementById('industrySelect').addEventListener('change', function() {
+        if (this.value) {
+            document.getElementById('customInput').value = '';
+        }
+    });
+    
+    // Custom input clearing dropdown
+    document.getElementById('customInput').addEventListener('input', function() {
+        if (this.value) {
+            document.getElementById('industrySelect').value = '';
+        }
+    });
 }
 
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-function downloadCSV() {
-    if (!csvData) {
-        showAlert('No data to download', 'warning');
+// Generate value chain
+async function generateValueChain() {
+    const selectedValue = document.getElementById('industrySelect').value;
+    const customInput = document.getElementById('customInput').value.trim();
+    
+    if (!selectedValue && !customInput) {
+        showAlert('Please select an industry/function or enter a custom one.', 'warning');
         return;
     }
-
-    const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
     
-    if (link.download !== undefined) {
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', `generated_data_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    // Show loading
+    document.getElementById('selectionSection').style.display = 'none';
+    document.getElementById('loadingSpinner').style.display = 'block';
+    
+    try {
+        if (selectedValue && configData[selectedValue]) {
+            // Load from predefined config
+            currentConfig = configData[selectedValue];
+        } else {
+            // Generate using LLM for custom input
+            const industryName = customInput || selectedValue;
+            currentConfig = await generateCustomValueChain(industryName);
+        }
         
-        showAlert('CSV file downloaded successfully!', 'success');
-    } else {
-        showAlert('Download not supported in this browser', 'danger');
+        displayValueChain();
+        
+    } catch (error) {
+        console.error('Error generating value chain:', error);
+        showAlert('Error generating value chain. Please try again.', 'danger');
+        goBack();
+    } finally {
+        document.getElementById('loadingSpinner').style.display = 'none';
     }
 }
 
-function showAlert(message, type) {
-    // Remove existing alerts
-    const existingAlerts = document.querySelectorAll('.alert-custom');
-    existingAlerts.forEach(alert => alert.remove());
+// Generate custom value chain using LLM
+async function generateCustomValueChain(industryName) {
+    const systemPrompt = `You are an expert business analyst. Generate a value chain for the "${industryName}" industry or function. 
+    
+    Return ONLY a JSON object with this exact structure:
+    {
+      "name": "${industryName}",
+      "type": "custom",
+      "valueChain": ["Step 1", "Step 2", "Step 3", "Step 4", "Step 5", "Step 6"],
+      "useCases": {
+        "Step 1": ["Use Case 1", "Use Case 2", "Use Case 3", "Use Case 4"],
+        "Step 2": ["Use Case 1", "Use Case 2", "Use Case 3", "Use Case 4"]
+      }
+    }
+    
+    - Generate 4-8 value chain steps that are typical for this industry/function
+    - For each step, generate 3-6 LLM use cases (3-6 words each)
+    - Use cases should leverage AI/LLM capabilities like text generation, analysis, automation, etc.
+    - Return only valid JSON, no explanations`;
+    
+    const userMessage = `Generate value chain and LLM use cases for: ${industryName}`;
+    
+    try {
+        const response = await callLLM(systemPrompt, userMessage);
+        // Clean up response and parse JSON
+        const cleanResponse = response.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        return JSON.parse(cleanResponse);
+    } catch (error) {
+        console.error('Error generating custom value chain:', error);
+        // Fallback to default structure
+        return {
+            name: industryName,
+            type: 'custom',
+            valueChain: [
+                'Planning & Strategy',
+                'Resource Allocation',
+                'Operations Management',
+                'Quality Assurance',
+                'Customer Relations',
+                'Performance Analysis'
+            ],
+            useCases: {
+                'Planning & Strategy': ['Strategic Planning', 'Market Analysis', 'Competitive Intelligence', 'Risk Assessment'],
+                'Resource Allocation': ['Resource Optimization', 'Budget Planning', 'Capacity Management', 'Workflow Automation'],
+                'Operations Management': ['Process Automation', 'Performance Monitoring', 'Quality Control', 'Efficiency Analysis'],
+                'Quality Assurance': ['Quality Prediction', 'Defect Detection', 'Compliance Monitoring', 'Audit Automation'],
+                'Customer Relations': ['Customer Support', 'Sentiment Analysis', 'Personalization', 'Feedback Processing'],
+                'Performance Analysis': ['Data Analytics', 'Predictive Modeling', 'Report Generation', 'Trend Analysis']
+            }
+        };
+    }
+}
 
+// Display value chain
+function displayValueChain() {
+    document.getElementById('valueChainTitle').textContent = `${currentConfig.name} Value Chain`;
+    
+    const stepsContainer = document.getElementById('valueChainSteps');
+    stepsContainer.innerHTML = '';
+    
+    // Create rows of chevrons (4 per row)
+    const steps = currentConfig.valueChain;
+    for (let i = 0; i < steps.length; i += 4) {
+        const row = document.createElement('div');
+        row.className = 'row mb-4';
+        
+        const rowSteps = steps.slice(i, i + 4);
+        rowSteps.forEach((step, index) => {
+            const col = document.createElement('div');
+            col.className = 'col-md-3';
+            
+            // Create chevron
+            const chevron = document.createElement('div');
+            chevron.className = 'chevron';
+            chevron.textContent = step;
+            
+            col.appendChild(chevron);
+            
+            // Create use case boxes
+            const useCases = currentConfig.useCases[step] || [];
+            useCases.forEach((useCase, useCaseIndex) => {
+                const useCaseBox = document.createElement('div');
+                useCaseBox.className = 'use-case-box';
+                useCaseBox.textContent = 'Click to reveal';
+                useCaseBox.dataset.step = step;
+                useCaseBox.dataset.useCase = useCase;
+                useCaseBox.dataset.id = `${i + index}-${useCaseIndex}`;
+                
+                useCaseBox.addEventListener('click', function() {
+                    revealUseCase(this);
+                });
+                
+                col.appendChild(useCaseBox);
+            });
+            
+            row.appendChild(col);
+        });
+        
+        stepsContainer.appendChild(row);
+    }
+    
+    document.getElementById('valueChainContainer').style.display = 'block';
+}
+
+// Reveal use case
+function revealUseCase(box) {
+    if (!box.classList.contains('revealed')) {
+        box.classList.add('revealed');
+        box.textContent = box.dataset.useCase;
+    }
+    
+    // Open modal
+    openUseCaseModal(box.dataset.id, box.dataset.step, box.dataset.useCase);
+}
+
+// Open use case modal
+function openUseCaseModal(useCaseId, step, useCase) {
+    currentUseCaseId = useCaseId;
+    
+    document.getElementById('useCaseTitle').textContent = useCase;
+    
+    // Initialize chat session if not exists
+    if (!chatSessions[useCaseId]) {
+        chatSessions[useCaseId] = [
+            {
+                role: 'assistant',
+                content: `This is the "${useCase}" use case for ${step}. I can help you understand how this LLM use case works, provide implementation details, or help you modify it for your specific needs. What would you like to know?`
+            }
+        ];
+    }
+    
+    displayChatMessages(useCaseId);
+    
+    const modal = new bootstrap.Modal(document.getElementById('useCaseModal'));
+    modal.show();
+}
+
+// Display chat messages
+function displayChatMessages(useCaseId) {
+    const chatContainer = document.getElementById('chatMessages');
+    chatContainer.innerHTML = '';
+    
+    const messages = chatSessions[useCaseId] || [];
+    messages.forEach(message => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${message.role}`;
+        messageDiv.textContent = message.content;
+        chatContainer.appendChild(messageDiv);
+    });
+    
+    // Scroll to bottom
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+// Send chat message
+async function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+    
+    if (!message || !currentUseCaseId) return;
+    
+    // Add user message
+    chatSessions[currentUseCaseId].push({
+        role: 'user',
+        content: message
+    });
+    
+    input.value = '';
+    displayChatMessages(currentUseCaseId);
+    
+    // Get AI response using the existing callLLM function
+    try {
+        const currentUseCase = chatSessions[currentUseCaseId].find(msg => msg.role === 'assistant');
+        const systemPrompt = `You are an AI expert helping users understand and implement LLM use cases. The current use case being discussed is related to the conversation context. Provide helpful, practical advice about LLM implementation, benefits, challenges, and modifications. Keep responses concise but informative.`;
+        
+        // Build context from chat history
+        const chatHistory = chatSessions[currentUseCaseId].slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('\n');
+        const userMessage = `Context: ${chatHistory}\n\nUser question: ${message}`;
+        
+        const response = await callLLM(systemPrompt, userMessage);
+        
+        chatSessions[currentUseCaseId].push({
+            role: 'assistant',
+            content: response
+        });
+        
+        displayChatMessages(currentUseCaseId);
+    } catch (error) {
+        console.error('Error getting AI response:', error);
+        chatSessions[currentUseCaseId].push({
+            role: 'assistant',
+            content: 'I apologize, but I encountered an error processing your request. Please try again.'
+        });
+        displayChatMessages(currentUseCaseId);
+    }
+}
+
+// Go back to selection
+function goBack() {
+    document.getElementById('valueChainContainer').style.display = 'none';
+    document.getElementById('loadingSpinner').style.display = 'none';
+    document.getElementById('selectionSection').style.display = 'block';
+    
+    // Reset selections
+    document.getElementById('industrySelect').value = '';
+    document.getElementById('customInput').value = '';
+    currentConfig = null;
+}
+
+// Export configuration
+function exportConfiguration() {
+    if (!currentConfig) {
+        showAlert('No configuration to export', 'warning');
+        return;
+    }
+    
+    const exportData = {
+        ...currentConfig,
+        chatSessions: chatSessions
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${currentConfig.name.toLowerCase().replace(/\s+/g, '-')}-use-cases.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    showAlert('Configuration exported successfully!', 'success');
+}
+
+// Import configuration
+function importConfiguration(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            currentConfig = importedData;
+            chatSessions = importedData.chatSessions || {};
+            
+            displayValueChain();
+            document.getElementById('selectionSection').style.display = 'none';
+            
+            showAlert('Configuration imported successfully!', 'success');
+        } catch (error) {
+            showAlert('Error importing configuration file', 'danger');
+        }
+    };
+    reader.readAsText(file);
+}
+
+// Show alert function (reuse existing or add if not present)
+function showAlert(message, type = 'info') {
     const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-custom`;
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
     alertDiv.innerHTML = `
         ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
-
-    // Insert at the top of the container
+    
     const container = document.querySelector('.container');
     container.insertBefore(alertDiv, container.firstChild);
-
-    // Auto-remove after 5 seconds
+    
+    // Auto-dismiss after 5 seconds
     setTimeout(() => {
-        if (alertDiv.parentNode) {
+        if (alertDiv && alertDiv.parentNode) {
             alertDiv.remove();
         }
     }, 5000);
 }
-
-// Initialize the app when DOM is loaded
-document.addEventListener('DOMContentLoaded', async () => {
-    await init();
-    initializeEventListeners();
-});
-
-// Add some example data on page load for demonstration
-window.addEventListener('load', () => {
-    const rowHeaders = document.getElementById('rowHeaders');
-    const columnHeaders = document.getElementById('columnHeaders');
-    
-    if (!rowHeaders.value) {
-        rowHeaders.value = `Product A
-Product B
-Product C
-Product D
-Product E`;
-    }
-    
-    if (!columnHeaders.value) {
-        columnHeaders.value = `Category
-Price
-Rating
-Stock Quantity
-`;
-    }
-});

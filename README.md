@@ -1,58 +1,64 @@
-# DataGen
+# LLM Use Case Explorer
 
-A simple, powerful web application that generates structured CSV data using AI. Perfect for creating sample datasets, testing data, or generating realistic data for your projects.
+A powerful web application that helps business users identify and explore LLM (Large Language Model) use cases based on their industry or function. Discover AI opportunities through interactive value chain visualization and detailed use case exploration.
 
 ## 🚀 Features
 
-- **AI-Powered Data Generation** - Uses advanced language models to create realistic, structured data
-- **Flexible Input Options** - Provide specific headers OR describe what you want
-- **Live Preview** - See your generated data in a formatted table before downloading
-- **CSV Export** - Download your data as a properly formatted CSV file
-- **Clean Interface** - Simple, intuitive design built with Bootstrap
-- **No Setup Required** - Just open and use in any modern web browser
+- **Industry/Function Selection** - Choose from predefined options or enter custom industries
+- **AI-Powered Value Chain Generation** - Automatically generates 4-8 step value chains
+- **Interactive Chevron Visualization** - Beautiful visual representation with 4 chevrons per row
+- **Hidden Use Case Discovery** - 3-6 use cases per value chain step, revealed on click
+- **Modal Chat Interface** - Interactive discussions about each use case with LLM
+- **Export/Import Configuration** - Save and resume sessions as JSON files
+- **Independent Chat Sessions** - Each use case maintains its own conversation history
+- **Clean Bootstrap Interface** - Modern, responsive design with FontAwesome icons
 
 ## 📋 Quick Start
 
-### For Users
+### For Business Users
 
 1. **Open the App**
    - Simply open `index.html` in your web browser
    - No installation or setup required
 
-2. **Configure Your Data**
-   - **System Prompt**: Customize how the AI generates data (optional)
-   - **Row Headers**: Enter specific product names OR describe what rows you want
-   - **Column Headers**: Enter specific column names OR describe what data you need
+2. **Select Your Context**
+   - **Predefined Options**: Choose from dropdown (Retail, Manufacturing, HR, IT, etc.)
+   - **Custom Input**: Enter your specific industry or business function
+   - Click "Generate Value Chain" to proceed
 
-3. **Generate & Download**
-   - Click "Generate Data" to create your CSV
-   - Preview the results in the table
-   - Click "Download CSV" to save the file
+3. **Explore Value Chain**
+   - View your industry's value chain as interactive chevrons
+   - Each chevron represents a key business process step
+   - Maximum of 4 chevrons displayed per row
 
-### Example Usage
+4. **Discover Use Cases**
+   - Click on hidden use case boxes below each chevron
+   - Each box reveals a specific LLM use case for that process
+   - 3-6 use cases available per value chain step
 
-**Specific Headers:**
-```
-Row Headers:
-iPhone 15
-Samsung Galaxy S24
-Google Pixel 8
+5. **Interactive Chat**
+   - Click any revealed use case to open a modal dialog
+   - Chat with the LLM about implementation details
+   - Ask for clarifications, modifications, or deeper insights
+   - Each use case maintains its own conversation history
 
-Column Headers:
-Category
-Price
-Rating
-Storage
-```
+6. **Save & Resume**
+   - Export your configuration and chat sessions as JSON
+   - Import previously saved sessions to continue exploration
 
-**Descriptive Input:**
-```
-Row Headers:
-5 popular smartphone models from 2023
+### Example Workflows
 
-Column Headers:
-Product specifications including pricing and technical details
-```
+**Retail Industry:**
+1. Select "Retail" from dropdown
+2. Explore value chain: Sourcing → Inventory → Sales → Customer Service
+3. Discover use cases like "Demand Forecasting" or "Personalized Recommendations"
+4. Chat about implementation strategies
+
+**Custom Function:**
+1. Enter "Supply Chain Management" in custom input
+2. AI generates relevant value chain steps
+3. Explore AI opportunities in logistics and procurement
+4. Export findings for team discussion
 
 ## 🛠️ For Developers
 
@@ -60,38 +66,49 @@ Product specifications including pricing and technical details
 
 ```
 data-generator-app/
-├── index.html          # Main HTML interface
-├── script.js           # JavaScript functionality
+├── index.html          # Main HTML interface with LLM Use Case Explorer UI
+├── script.js           # JavaScript functionality for value chains and chat
+├── config.json         # Predefined industries/functions and use cases
 ├── .gitignore         # Git ignore rules
-└── README.md          # This file
+└── README.md          # This documentation
 ```
 
 ### Technical Details
 
 - **Frontend**: Vanilla HTML, CSS, JavaScript
-- **Styling**: Bootstrap 5.3.0
+- **Styling**: Bootstrap 5.3.0 + FontAwesome 6.0.0
 - **API**: Custom LLM endpoint (llmfoundry.straive.com)
 - **Model**: GPT-4.1-mini
 - **Authentication**: Token-based with credentials
+- **Data Storage**: Local JSON configuration + client-side session management
+- **UI Components**: Modal dialogs, chevron visualization, interactive chat
 
 ### Key Functions
 
 ```javascript
 // Core API functions
 callLLM(systemPrompt, userMessage)    // Makes API calls to LLM
-init()                                // Initializes token authentication
+init()                                // Initializes app and loads config
 
-// UI Functions
-generateData()                        // Main data generation workflow
-displayPreview(data)                  // Shows CSV in table format
-downloadCSV()                         // Handles file download
-buildUserMessage()                    // Constructs prompts for LLM
+// Value Chain Functions
+generateValueChain()                  // Main workflow for generating value chains
+loadConfigData()                      // Loads predefined industry/function data
+displayValueChain()                   // Renders chevrons and use case boxes
+
+// Use Case Interaction
+revealUseCase(element)                // Shows hidden use case text
+openUseCaseModal(step, useCase)       // Opens chat modal for use case
+sendChatMessage()                     // Handles chat interactions
+
+// Data Management
+exportConfig()                        // Exports current session as JSON
+importConfig(file)                    // Imports saved configuration
+showAlert(message, type)              // User feedback system
 ```
 
 ### API Integration
 
 The app uses a custom LLM API endpoint:
-- **Endpoint**: `https://llmfoundry.straive.com/openai/v1/chat/completions`
 - **Authentication**: Bearer token with app identifier
 - **Model**: `gpt-4.1-mini`
 - **Token Management**: Automatic token retrieval from `/token` endpoint
@@ -119,62 +136,83 @@ The app uses a custom LLM API endpoint:
 
 ## 🎯 Use Cases
 
-### Business & Marketing
-- Generate sample customer data
-- Create product catalogs
-- Build test datasets for analytics
+### Business Strategy & Planning
+- **Digital Transformation**: Identify AI opportunities across business processes
+- **Innovation Workshops**: Facilitate brainstorming sessions with structured use case exploration
+- **Technology Roadmapping**: Plan AI implementation priorities by business function
 
-### Development & Testing
-- Generate test data for applications
-- Create mock APIs responses
-- Build sample databases
+### Consulting & Advisory
+- **Client Assessments**: Quickly demonstrate AI potential in client industries
+- **Proposal Development**: Generate specific use cases for project proposals
+- **Industry Analysis**: Compare AI opportunities across different sectors
 
-### Research & Education
-- Create datasets for analysis
-- Generate examples for tutorials
-- Build sample data for presentations
+### Training & Education
+- **AI Literacy Programs**: Teach business users about practical AI applications
+- **Executive Briefings**: Present concrete examples of AI value in specific contexts
+- **Workshop Facilitation**: Guide teams through systematic use case identification
+
+### Product & Solution Development
+- **Feature Ideation**: Discover new AI-powered features for existing products
+- **Market Research**: Understand AI needs in target industries
+- **Competitive Analysis**: Map AI capabilities against market opportunities
 
 ## 🔧 Customization
 
-### System Prompts
-Modify the default system prompt to change how data is generated:
+### Adding New Industries/Functions
+Extend the predefined options by editing `config.json`:
+
+```json
+{
+  "new-industry": {
+    "name": "Your Industry Name",
+    "type": "industry",
+    "valueChain": ["Step 1", "Step 2", "Step 3", "Step 4"],
+    "useCases": {
+      "Step 1": ["Use Case 1", "Use Case 2", "Use Case 3"]
+    }
+  }
+}
+```
+
+### Customizing LLM Prompts
+Modify value chain generation prompts in `script.js`:
 
 ```javascript
-// Example custom prompts:
-"Generate financial data with realistic market trends"
-"Create educational content with proper academic formatting"
-"Generate e-commerce data with seasonal variations"
+// Customize the system prompt for value chain generation
+const systemPrompt = `You are an expert business analyst...
+// Add your specific requirements here`;
 ```
 
 ### Adding New Features
 
-The modular function-based architecture makes it easy to extend:
+The modular architecture supports easy extensions:
 
 ```javascript
-// Add new validation
-function validateCustomInput() { /* ... */ }
+// Add new visualization types
+function displayKanbanView() { /* ... */ }
 
 // Add new export formats
-function downloadJSON() { /* ... */ }
+function exportToPowerPoint() { /* ... */ }
 
-// Add new data processing
-function processSpecialFormat(data) { /* ... */ }
+// Add new chat capabilities
+function addUseCaseToFavorites() { /* ... */ }
 ```
 
-## 📊 Data Quality
+## 📊 Value Chain Quality
 
 The AI generates:
-- **Realistic values** based on context
-- **Consistent formatting** across rows
-- **Logical relationships** between columns
-- **Diverse data** to avoid repetition
+- **Industry-Relevant Steps** - Value chains tailored to specific business contexts
+- **Logical Flow** - Sequential steps that reflect real business processes
+- **Comprehensive Coverage** - 4-8 steps covering end-to-end operations
+- **Actionable Use Cases** - 3-6 practical LLM applications per step
 
 ## 🔒 Privacy & Security
 
-- **No data storage** - All processing happens client-side
+- **No persistent storage** - All data remains client-side during sessions
 - **Secure API calls** - Uses HTTPS and token authentication
-- **Local processing** - CSV generation and preview happen in browser
-- **No tracking** - No analytics or user tracking
+- **Local chat sessions** - Conversation history stored in browser memory
+- **Export control** - Users control what data is saved via JSON export
+- **No tracking** - No analytics or user behavior tracking
 
 ## 🐛 Troubleshooting
 
@@ -183,14 +221,27 @@ The AI generates:
 **"API token not initialized"**
 - Ensure you have proper authentication with the LLM service
 - Check browser console for network errors
+- Verify the token endpoint is accessible
 
-**"No data to download"**
-- Make sure data generation completed successfully
-- Check that both row and column headers are provided
+**"Loading spinner won't disappear"**
+- Check browser console for JavaScript errors
+- Ensure config.json is properly formatted
+- Verify all required DOM elements exist
 
-**Preview not showing**
-- Verify the generated CSV format is valid
-- Check browser console for parsing errors
+**"Value chain not displaying"**
+- Confirm the industry/function selection was successful
+- Check that currentConfig is properly populated
+- Verify the displayValueChain function completed
+
+**"Use case modal not opening"**
+- Ensure Bootstrap JavaScript is loaded
+- Check for JavaScript errors in console
+- Verify modal HTML structure is intact
+
+**"Chat not working"**
+- Confirm API token is valid and not expired
+- Check network connectivity to LLM endpoint
+- Verify chat input and send button event listeners
 
 ### Browser Compatibility
 
@@ -218,5 +269,3 @@ This project is open source and available under the [MIT License](LICENSE).
 - **Community**: Contribute to discussions and improvements
 
 ---
-
-**Made with ❤️ for developers and data enthusiasts**
