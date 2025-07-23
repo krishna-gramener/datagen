@@ -349,6 +349,206 @@
       ]
     }
   },
+  "education": {
+    "name": "Education",
+    "type": "industry",
+    "valueChain": [
+      "Student Recruitment",
+      "Curriculum Development",
+      "Teaching & Learning",
+      "Student Assessment",
+      "Student Support",
+      "Administrative Operations"
+    ],
+    "useCases": {
+      "Student Recruitment": [
+        "Application Screening",
+        "Personalized Outreach",
+        "Admission Prediction",
+        "Scholarship Matching"
+      ],
+      "Curriculum Development": [
+        "Content Generation",
+        "Learning Path Design",
+        "Skill Gap Analysis",
+        "Course Optimization"
+      ],
+      "Teaching & Learning": [
+        "Personalized Tutoring",
+        "Automated Grading",
+        "Learning Analytics",
+        "Adaptive Learning"
+      ],
+      "Student Assessment": [
+        "Plagiarism Detection",
+        "Performance Prediction",
+        "Feedback Generation",
+        "Progress Tracking"
+      ],
+      "Student Support": [
+        "Academic Advising",
+        "Mental Health Support",
+        "Career Guidance",
+        "Financial Aid Assistance"
+      ],
+      "Administrative Operations": [
+        "Schedule Optimization",
+        "Resource Allocation",
+        "Communication Automation",
+        "Compliance Monitoring"
+      ]
+    }
+  },
+  "technology": {
+    "name": "Technology",
+    "type": "industry",
+    "valueChain": [
+      "Research & Development",
+      "Product Design",
+      "Software Development",
+      "Quality Assurance",
+      "Product Launch",
+      "Customer Success"
+    ],
+    "useCases": {
+      "Research & Development": [
+        "Patent Analysis",
+        "Technology Scouting",
+        "Innovation Tracking",
+        "Competitive Intelligence"
+      ],
+      "Product Design": [
+        "User Experience Design",
+        "Prototype Generation",
+        "Design Optimization",
+        "Accessibility Testing"
+      ],
+      "Software Development": [
+        "Code Generation",
+        "Bug Detection",
+        "Code Review",
+        "Documentation Automation"
+      ],
+      "Quality Assurance": [
+        "Test Case Generation",
+        "Automated Testing",
+        "Performance Monitoring",
+        "Security Scanning"
+      ],
+      "Product Launch": [
+        "Market Analysis",
+        "Launch Planning",
+        "Content Creation",
+        "User Onboarding"
+      ],
+      "Customer Success": [
+        "Usage Analytics",
+        "Churn Prediction",
+        "Feature Adoption",
+        "Support Automation"
+      ]
+    }
+  },
+  "finance": {
+    "name": "Finance",
+    "type": "function",
+    "valueChain": [
+      "Financial Planning",
+      "Budgeting & Forecasting",
+      "Accounting & Reporting",
+      "Risk Management",
+      "Investment Analysis",
+      "Compliance & Audit"
+    ],
+    "useCases": {
+      "Financial Planning": [
+        "Strategic Planning",
+        "Cash Flow Forecasting",
+        "Scenario Modeling",
+        "Capital Allocation"
+      ],
+      "Budgeting & Forecasting": [
+        "Budget Automation",
+        "Variance Analysis",
+        "Predictive Modeling",
+        "Performance Tracking"
+      ],
+      "Accounting & Reporting": [
+        "Transaction Processing",
+        "Report Generation",
+        "Data Reconciliation",
+        "Financial Analysis"
+      ],
+      "Risk Management": [
+        "Risk Assessment",
+        "Fraud Detection",
+        "Credit Analysis",
+        "Market Risk Modeling"
+      ],
+      "Investment Analysis": [
+        "Portfolio Optimization",
+        "Due Diligence",
+        "Valuation Modeling",
+        "Performance Attribution"
+      ],
+      "Compliance & Audit": [
+        "Regulatory Reporting",
+        "Audit Automation",
+        "Policy Monitoring",
+        "Control Testing"
+      ]
+    }
+  },
+  "operations": {
+    "name": "Operations",
+    "type": "function",
+    "valueChain": [
+      "Process Design",
+      "Resource Planning",
+      "Production Management",
+      "Quality Control",
+      "Supply Chain Management",
+      "Performance Optimization"
+    ],
+    "useCases": {
+      "Process Design": [
+        "Workflow Optimization",
+        "Process Automation",
+        "Bottleneck Identification",
+        "Standard Operating Procedures"
+      ],
+      "Resource Planning": [
+        "Capacity Planning",
+        "Staff Scheduling",
+        "Equipment Allocation",
+        "Demand Forecasting"
+      ],
+      "Production Management": [
+        "Production Scheduling",
+        "Inventory Management",
+        "Yield Optimization",
+        "Maintenance Planning"
+      ],
+      "Quality Control": [
+        "Quality Monitoring",
+        "Defect Prediction",
+        "Root Cause Analysis",
+        "Continuous Improvement"
+      ],
+      "Supply Chain Management": [
+        "Supplier Management",
+        "Logistics Optimization",
+        "Risk Assessment",
+        "Cost Optimization"
+      ],
+      "Performance Optimization": [
+        "KPI Monitoring",
+        "Efficiency Analysis",
+        "Benchmarking",
+        "Predictive Analytics"
+      ]
+    }
+  },
   "marketing": {
     "name": "Marketing",
     "type": "function",

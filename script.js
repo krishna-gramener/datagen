@@ -1,6 +1,4 @@
 let token = null;
-
-// LLM Use Case Explorer variables
 let currentConfig = null;
 let currentSelection = null;
 let chatSessions = {};
@@ -13,7 +11,7 @@ async function callLLM(systemPrompt, userMessage) {
     const response = await fetch("https://llmfoundry.straive.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}:data-generator-app`,
+        Authorization: `Bearer ${token}:llm-use-case-explorer`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -71,51 +69,8 @@ function initializeEventListeners() {
     if (isUseCaseMode) {
         setupUseCaseEventListeners();
     }
-    // Removed CSV data generation functionality
 }
 
-function saveInputs() {
-    const inputs = {
-        systemPrompt: document.getElementById('systemPrompt').value,
-        rowHeaders: document.getElementById('rowHeaders').value,
-        columnHeaders: document.getElementById('columnHeaders').value
-    };
-    localStorage.setItem('dataGeneratorInputs', JSON.stringify(inputs));
-}
-
-function loadSavedData() {
-    const saved = localStorage.getItem('dataGeneratorInputs');
-    if (saved) {
-        const inputs = JSON.parse(saved);
-        document.getElementById('systemPrompt').value = inputs.systemPrompt || document.getElementById('systemPrompt').value;
-        document.getElementById('rowHeaders').value = inputs.rowHeaders || '';
-        document.getElementById('columnHeaders').value = inputs.columnHeaders || '';
-    }
-}
-
-function validateInputs() {
-    const rowHeaders = document.getElementById('rowHeaders').value.trim();
-    const columnHeaders = document.getElementById('columnHeaders').value.trim();
-
-    if (!rowHeaders) {
-        showAlert('Please enter row headers', 'warning');
-        return false;
-    }
-
-    if (!columnHeaders) {
-        showAlert('Please enter column headers', 'warning');
-        return false;
-    }
-
-    if (!token) {
-        showAlert('API token not initialized', 'warning');
-        return false;
-    }
-
-    return true;
-}
-
-// CSV data generation functions removed - focusing only on LLM Use Case Explorer
 document.addEventListener('DOMContentLoaded', async () => {
     // Ensure loading spinner is hidden immediately
     const loadingSpinner = document.getElementById('loadingSpinner');
@@ -132,10 +87,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Removed CSV example data loading
-
-// ===== LLM USE CASE EXPLORER FUNCTIONS =====
-
 // Load configuration data
 async function loadConfigData() {
     try {
@@ -144,7 +95,6 @@ async function loadConfigData() {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         configData = await response.json();
-        console.log('Config data loaded successfully', configData);
     } catch (error) {
         console.error('Error loading config data:', error);
         // Set empty config data as fallback
@@ -170,13 +120,6 @@ function setupUseCaseEventListeners() {
     
     // Modal chat functionality
     document.getElementById('sendChatBtn').addEventListener('click', sendChatMessage);
-    
-    // Custom input enter key
-    document.getElementById('customInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            generateValueChain();
-        }
-    });
     
     // Dropdown selection
     document.getElementById('industrySelect').addEventListener('change', function() {
@@ -257,27 +200,6 @@ async function generateCustomValueChain(industryName) {
         return JSON.parse(cleanResponse);
     } catch (error) {
         console.error('Error generating custom value chain:', error);
-        // Fallback to default structure
-        return {
-            name: industryName,
-            type: 'custom',
-            valueChain: [
-                'Planning & Strategy',
-                'Resource Allocation',
-                'Operations Management',
-                'Quality Assurance',
-                'Customer Relations',
-                'Performance Analysis'
-            ],
-            useCases: {
-                'Planning & Strategy': ['Strategic Planning', 'Market Analysis', 'Competitive Intelligence', 'Risk Assessment'],
-                'Resource Allocation': ['Resource Optimization', 'Budget Planning', 'Capacity Management', 'Workflow Automation'],
-                'Operations Management': ['Process Automation', 'Performance Monitoring', 'Quality Control', 'Efficiency Analysis'],
-                'Quality Assurance': ['Quality Prediction', 'Defect Detection', 'Compliance Monitoring', 'Audit Automation'],
-                'Customer Relations': ['Customer Support', 'Sentiment Analysis', 'Personalization', 'Feedback Processing'],
-                'Performance Analysis': ['Data Analytics', 'Predictive Modeling', 'Report Generation', 'Trend Analysis']
-            }
-        };
     }
 }
 
@@ -319,6 +241,10 @@ function displayValueChain() {
                 useCaseBox.addEventListener('click', function() {
                     revealUseCase(this);
                 });
+
+                useCaseBox.addEventListener('dblclick', function() {
+                    openUseCaseModal(this.dataset.id, this.dataset.step, this.dataset.useCase);
+                });
                 
                 col.appendChild(useCaseBox);
             });
@@ -338,9 +264,6 @@ function revealUseCase(box) {
         box.classList.add('revealed');
         box.textContent = box.dataset.useCase;
     }
-    
-    // Open modal
-    openUseCaseModal(box.dataset.id, box.dataset.step, box.dataset.useCase);
 }
 
 // Open use case modal
@@ -358,9 +281,7 @@ function openUseCaseModal(useCaseId, step, useCase) {
             }
         ];
     }
-    
     displayChatMessages(useCaseId);
-    
     const modal = new bootstrap.Modal(document.getElementById('useCaseModal'));
     modal.show();
 }
