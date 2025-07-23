@@ -295,7 +295,14 @@ function displayChatMessages(useCaseId) {
     messages.forEach(message => {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${message.role}`;
-        messageDiv.textContent = message.content;
+        
+        // Use marked.parse for assistant messages, plain text for user messages
+        if (message.role === 'assistant') {
+            messageDiv.innerHTML = marked.parse(message.content);
+        } else {
+            messageDiv.textContent = message.content;
+        }
+        
         chatContainer.appendChild(messageDiv);
     });
     
@@ -307,6 +314,8 @@ function displayChatMessages(useCaseId) {
 async function sendChatMessage() {
     const input = document.getElementById('chatInput');
     const message = input.value.trim();
+    const chatLoader = document.getElementById('chatLoader');
+    const sendBtn = document.getElementById('sendChatBtn');
     
     if (!message || !currentUseCaseId) return;
     
@@ -318,6 +327,11 @@ async function sendChatMessage() {
     
     input.value = '';
     displayChatMessages(currentUseCaseId);
+    
+    // Show loader and disable input
+    chatLoader.style.display = 'block';
+    input.disabled = true;
+    sendBtn.disabled = true;
     
     // Get AI response using the existing callLLM function
     try {
@@ -343,6 +357,12 @@ async function sendChatMessage() {
             content: 'I apologize, but I encountered an error processing your request. Please try again.'
         });
         displayChatMessages(currentUseCaseId);
+    } finally {
+        // Hide loader and re-enable input
+        chatLoader.style.display = 'none';
+        input.disabled = false;
+        sendBtn.disabled = false;
+        input.focus();
     }
 }
 
