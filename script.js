@@ -1,17 +1,21 @@
-let token = null;
+import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
+
 let currentConfig = null;
-let currentSelection = null;
 let chatSessions = {};
 let currentUseCaseId = null;
 let configData = null;
 let isUseCaseMode = false;
 
+const { baseURL, apiKey, models } = await openaiConfig({
+    defaultBaseUrls: ["https://llmfoundry.straive.com/openai/v1","https://llmfoundry.straivedemo.com/openai/v1","https://aipipe.org/api/v1","https://api.openai.com/v1", "https://openrouter.com/api/v1"],
+  });
+
 async function callLLM(systemPrompt, userMessage) {
   try {
-    const response = await fetch("https://llmfoundry.straive.com/openai/v1/chat/completions", {
+    const response = await fetch(baseURL, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${token}:llm-use-case-explorer`,
+        Authorization: `Bearer ${apiKey}:llm-use-case-explorer`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -44,12 +48,7 @@ async function init() {
     if (loadingSpinner) {
       loadingSpinner.style.display = 'none';
     }
-    
-    // Get API token
-    const response = await fetch("https://llmfoundry.straive.com/token", { credentials: "include" });
-    const data = await response.json();
-    token = data.token;
-    
+
     if (isUseCaseMode) {
       await loadConfigData();
     }
