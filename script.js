@@ -264,9 +264,6 @@ function displayValueChain() {
                 
                 useCaseBox.addEventListener('click', function() {
                     revealUseCase(this);
-                });
-
-                useCaseBox.addEventListener('dblclick', function() {
                     openUseCaseModal(this.dataset.id, this.dataset.step, this.dataset.useCase);
                 });
                 
