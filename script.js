@@ -5,13 +5,32 @@ let chatSessions = {};
 let currentUseCaseId = null;
 let configData = null;
 let isUseCaseMode = false;
+let baseURL = null;
+let apiKey = null;
 
-const { baseURL, apiKey, models } = await openaiConfig({
-    defaultBaseUrls: ["https://llmfoundry.straive.com/openai/v1","https://llmfoundry.straivedemo.com/openai/v1","https://aipipe.org/api/v1","https://api.openai.com/v1", "https://openrouter.com/api/v1"],
-  });
+// Initialize OpenAI configuration
+async function initializeOpenAI() {
+  try {
+    const config = await openaiConfig({
+      defaultBaseUrls: ["https://llmfoundry.straive.com/openai/v1","https://llmfoundry.straivedemo.com/openai/v1","https://aipipe.org/api/v1","https://api.openai.com/v1", "https://openrouter.com/api/v1"],
+    });
+    baseURL = config.baseURL;
+    apiKey = config.apiKey;
+    console.log('OpenAI configuration initialized successfully');
+    return true;
+  } catch (error) {
+    console.error('Failed to initialize OpenAI configuration:', error);
+    showAlert('Failed to initialize AI configuration. Some features may not work.', 'warning');
+    return false;
+  }
+}
 
 async function callLLM(systemPrompt, userMessage) {
   try {
+    if (!baseURL || !apiKey) {
+      throw new Error('OpenAI configuration not initialized');
+    }
+    
     const response = await fetch(baseURL, {
       method: "POST",
       headers: {
@@ -40,6 +59,9 @@ async function callLLM(systemPrompt, userMessage) {
 
 async function init() {
   try {
+    // Initialize OpenAI configuration first
+    await initializeOpenAI();
+    
     // Check if we're in use case mode by looking for specific elements
     isUseCaseMode = document.getElementById('industrySelect') !== null;
     
@@ -116,6 +138,9 @@ function setupUseCaseEventListeners() {
         document.getElementById('importFile').click();
     });
     document.getElementById('importFile').addEventListener('change', importConfiguration);
+    
+    // View All button
+    document.getElementById('viewAllBtn').addEventListener('click', viewAllUseCases);
     
     // Modal chat functionality
     document.getElementById('sendChatBtn').addEventListener('click', sendChatMessage);
@@ -263,6 +288,17 @@ function revealUseCase(box) {
         box.classList.add('revealed');
         box.textContent = box.dataset.useCase;
     }
+}
+
+// View all use cases
+function viewAllUseCases() {
+    const useCaseBoxes = document.querySelectorAll('.use-case-box');
+    useCaseBoxes.forEach(box => {
+        if (!box.classList.contains('revealed')) {
+            box.classList.add('revealed');
+            box.textContent = box.dataset.useCase;
+        }
+    });
 }
 
 // Open use case modal
