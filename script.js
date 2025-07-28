@@ -1,37 +1,14 @@
-import { openaiConfig } from "https://cdn.jsdelivr.net/npm/bootstrap-llm-provider@1";
-
 let currentConfig = null;
 let chatSessions = {};
 let currentUseCaseId = null;
 let configData = null;
 let isUseCaseMode = false;
 let baseURL = null;
-let apiKey = null;
-
-// Initialize OpenAI configuration
-async function initializeOpenAI() {
-  try {
-    const config = await openaiConfig({
-      defaultBaseUrls: ["https://llmfoundry.straive.com/openai/v1","https://llmfoundry.straivedemo.com/openai/v1","https://aipipe.org/api/v1","https://api.openai.com/v1", "https://openrouter.com/api/v1"],
-    });
-    baseURL = config.baseURL;
-    apiKey = config.apiKey;
-    console.log('OpenAI configuration initialized successfully');
-    return true;
-  } catch (error) {
-    console.error('Failed to initialize OpenAI configuration:', error);
-    showAlert('Failed to initialize AI configuration. Some features may not work.', 'warning');
-    return false;
-  }
-}
+let apiKey = '';
 
 async function callLLM(systemPrompt, userMessage) {
   try {
-    if (!baseURL || !apiKey) {
-      throw new Error('OpenAI configuration not initialized');
-    }
-    
-    const response = await fetch(baseURL, {
+    const response = await fetch('https://llmfoundry.straive.com/openai/v1/chat/completions', {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}:llm-use-case-explorer`,
@@ -59,8 +36,9 @@ async function callLLM(systemPrompt, userMessage) {
 
 async function init() {
   try {
-    // Initialize OpenAI configuration first
-    await initializeOpenAI();
+    // Fetch API token
+    const { token } = await fetch("https://llmfoundry.straive.com/token", { credentials: "include" }).then((r) => r.json());
+    apiKey = token;
     
     // Check if we're in use case mode by looking for specific elements
     isUseCaseMode = document.getElementById('industrySelect') !== null;
@@ -253,18 +231,20 @@ function displayValueChain() {
             col.appendChild(chevron);
             
             // Create use case boxes
-            const useCases = currentConfig.useCases[step] || [];
-            useCases.forEach((useCase, useCaseIndex) => {
+            const useCases = currentConfig.useCases[step] || {};
+            Object.keys(useCases).forEach((useCaseKey, useCaseIndex) => {
+                const useCase = useCases[useCaseKey];
                 const useCaseBox = document.createElement('div');
                 useCaseBox.className = 'use-case-box';
-                useCaseBox.textContent = 'Click to reveal';
+                useCaseBox.innerHTML = 'Click to reveal';
                 useCaseBox.dataset.step = step;
-                useCaseBox.dataset.useCase = useCase;
-                useCaseBox.dataset.id = `${i + index}-${useCaseIndex}`;
+                useCaseBox.dataset.useCase = typeof useCase === 'string' ? useCase : useCase.name;
+                useCaseBox.dataset.useCaseKey = useCaseKey;
+                useCaseBox.dataset.id = `${step}-${useCaseIndex}`;
                 
                 useCaseBox.addEventListener('click', function() {
                     revealUseCase(this);
-                    openUseCaseModal(this.dataset.id, this.dataset.step, this.dataset.useCase);
+                    openUseCaseModal(this.dataset.id, this.dataset.step, this.dataset.useCase, this.dataset.useCaseKey);
                 });
                 
                 col.appendChild(useCaseBox);
@@ -299,23 +279,88 @@ function viewAllUseCases() {
 }
 
 // Open use case modal
-function openUseCaseModal(useCaseId, step, useCase) {
+function openUseCaseModal(useCaseId, step, useCase, useCaseKey) {
     currentUseCaseId = useCaseId;
     
     document.getElementById('useCaseTitle').textContent = useCase;
     
+    // Open modal immediately
+    const modal = new bootstrap.Modal(document.getElementById('useCaseModal'));
+    modal.show();
+    
     // Initialize chat session if not exists
     if (!chatSessions[useCaseId]) {
+        // Check if we have explanation in config data
+        if (currentConfig && currentConfig.useCases && 
+            currentConfig.useCases[step] && 
+            currentConfig.useCases[step][useCaseKey] && 
+            currentConfig.useCases[step][useCaseKey].explanation) {
+            
+            // Use pre-existing explanation
+            const explanation = currentConfig.useCases[step][useCaseKey].explanation;
+            chatSessions[useCaseId] = [
+                {
+                    role: 'assistant',
+                    content: explanation
+                }
+            ];
+            displayChatMessages(useCaseId);
+        } else {
+            // Show loading state immediately with spinner
+            chatSessions[useCaseId] = [
+                {
+                    role: 'assistant',
+                    content: '<div class="d-flex align-items-center"><div class="spinner-border spinner-border-sm text-primary me-2" role="status"><span class="visually-hidden">Loading...</span></div>Generating detailed explanation...</div>'
+                }
+            ];
+            displayChatMessages(useCaseId);
+            
+            // Generate explanation using LLM asynchronously
+            generateUseCaseExplanation(useCaseId, step, useCase, useCaseKey);
+        }
+    } else {
+        // Display existing chat session
+        displayChatMessages(useCaseId);
+    }
+}
+
+// Generate use case explanation asynchronously
+async function generateUseCaseExplanation(useCaseId, step, useCase, useCaseKey) {
+    try {
+        const systemPrompt = `You are an AI expert explaining LLM use cases. Provide a detailed, practical explanation of how this specific use case can be implemented using Large Language Models. Focus on real-world applications, benefits, and implementation considerations.`;
+        const userMessage = `Explain the "${useCase}" use case in the context of "${step}" for the ${currentConfig.name} industry/function. Provide specific details about how LLMs can be used, what data sources are needed, expected benefits, and implementation challenges.`;
+        
+        const explanation = await callLLM(systemPrompt, userMessage);
+        
+        // Update the chat session with the generated explanation
         chatSessions[useCaseId] = [
             {
                 role: 'assistant',
-                content: `This is the "${useCase}" use case for ${step}. I can help you understand how this LLM use case works, provide implementation details, or help you modify it for your specific needs. What would you like to know?`
+                content: explanation
             }
         ];
+        
+        // Update the modal content if it's still open and showing this use case
+        if (currentUseCaseId === useCaseId) {
+            displayChatMessages(useCaseId);
+        }
+    } catch (error) {
+        console.error('Error generating explanation:', error);
+        const fallbackExplanation = `This is the "${useCase}" use case for ${step}. This use case leverages Large Language Models to improve efficiency and decision-making in this area. I can help you understand how this LLM use case works, provide implementation details, or help you modify it for your specific needs.`;
+        
+        // Update with fallback explanation
+        chatSessions[useCaseId] = [
+            {
+                role: 'assistant',
+                content: fallbackExplanation
+            }
+        ];
+        
+        // Update the modal content if it's still open and showing this use case
+        if (currentUseCaseId === useCaseId) {
+            displayChatMessages(useCaseId);
+        }
     }
-    displayChatMessages(useCaseId);
-    const modal = new bootstrap.Modal(document.getElementById('useCaseModal'));
-    modal.show();
 }
 
 // Display chat messages
