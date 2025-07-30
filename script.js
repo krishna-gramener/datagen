@@ -1,3 +1,5 @@
+import { asyncLLM } from "https://cdn.jsdelivr.net/npm/asyncllm@2";
+
 let currentConfig = null;
 let chatSessions = {};
 let currentUseCaseId = null;
@@ -31,6 +33,37 @@ async function callLLM(systemPrompt, userMessage) {
   } catch (error) {
     console.error(error);
     throw new Error(`API call failed: ${error.message}`);
+  }
+}
+
+// Streaming LLM function for use case descriptions
+async function callLLMStream(systemPrompt, userMessage, outputElement) {
+  try {
+    outputElement.innerHTML = ''; // Clear existing content
+    
+    for await (const { content } of asyncLLM("https://llmfoundry.straive.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}:llm-use-case-explorer`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4.1-mini",
+        stream: true,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userMessage }
+        ],
+      }),
+    })) {
+      
+      outputElement.innerHTML = marked.parse(content);
+      // Auto-scroll to bottom if needed
+      outputElement.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  } catch (error) {
+    console.error('Streaming error:', error);
+    outputElement.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
   }
 }
 
@@ -305,11 +338,11 @@ function openUseCaseModal(useCaseId, step, useCase, useCaseKey) {
             ];
             displayChatMessages(useCaseId);
         } else {
-            // Show loading state immediately with spinner
+            // Show empty state for streaming
             chatSessions[useCaseId] = [
                 {
                     role: 'assistant',
-                    content: '<div class="d-flex align-items-center"><div class="spinner-border spinner-border-sm text-primary me-2" role="status"><span class="visually-hidden">Loading...</span></div>Generating detailed explanation...</div>'
+                    content: '<div class="text-muted">Generating detailed explanation...</div>'
                 }
             ];
             displayChatMessages(useCaseId);
@@ -323,26 +356,33 @@ function openUseCaseModal(useCaseId, step, useCase, useCaseKey) {
     }
 }
 
-// Generate use case explanation asynchronously
+// Generate use case explanation asynchronously with streaming
 async function generateUseCaseExplanation(useCaseId, step, useCase, useCaseKey) {
     try {
-        const systemPrompt = `You are an AI expert explaining LLM use cases. Provide a detailed, practical explanation of how this specific use case can be implemented using Large Language Models. Focus on real-world applications, benefits, and implementation considerations.`;
+        const systemPrompt = `You are an AI expert explaining LLM use cases. Provide a detailed, practical explanation of how this specific use case can be implemented using Large Language Models. Focus on real-world applications, benefits, and implementation considerations.Give direct answer. Make sure its concise`;
         const userMessage = `Explain the "${useCase}" use case in the context of "${step}" for the ${currentConfig.name} industry/function. Provide specific details about how LLMs can be used, what data sources are needed, expected benefits, and implementation challenges.`;
         
-        const explanation = await callLLM(systemPrompt, userMessage);
-        
-        // Update the chat session with the generated explanation
+        // Initialize empty chat session for streaming
         chatSessions[useCaseId] = [
             {
                 role: 'assistant',
-                content: explanation
+                content: '' // Start with empty content for streaming
             }
         ];
         
-        // Update the modal content if it's still open and showing this use case
-        if (currentUseCaseId === useCaseId) {
-            displayChatMessages(useCaseId);
+        // Get the message element for streaming
+        const chatMessages = document.getElementById('chatMessages');
+        const messageElements = chatMessages.querySelectorAll('.message.assistant');
+        const latestMessage = messageElements[messageElements.length - 1];
+        
+        if (latestMessage && currentUseCaseId === useCaseId) {
+            // Stream directly to the latest assistant message
+            await callLLMStream(systemPrompt, userMessage, latestMessage);
+            
+            // Update the chat session with the final content
+            chatSessions[useCaseId][0].content = latestMessage.innerHTML;
         }
+        
     } catch (error) {
         console.error('Error generating explanation:', error);
         const fallbackExplanation = `This is the "${useCase}" use case for ${step}. This use case leverages Large Language Models to improve efficiency and decision-making in this area. I can help you understand how this LLM use case works, provide implementation details, or help you modify it for your specific needs.`;
@@ -409,29 +449,40 @@ async function sendChatMessage() {
     input.disabled = true;
     sendBtn.disabled = true;
     
-    // Get AI response using the existing callLLM function
+    // Add empty assistant message for streaming
+    chatSessions[currentUseCaseId].push({
+        role: 'assistant',
+        content: ''
+    });
+    displayChatMessages(currentUseCaseId);
+    
+    // Get AI response using streaming
     try {
-        const currentUseCase = chatSessions[currentUseCaseId].find(msg => msg.role === 'assistant');
         const systemPrompt = `You are an AI expert helping users understand and implement LLM use cases. The current use case being discussed is related to the conversation context. Provide helpful, practical advice about LLM implementation, benefits, challenges, and modifications. Keep responses concise but informative.`;
         
-        // Build context from chat history
-        const chatHistory = chatSessions[currentUseCaseId].slice(-5).map(msg => `${msg.role}: ${msg.content}`).join('\n');
+        // Build context from chat history (excluding the empty message we just added)
+        const chatHistory = chatSessions[currentUseCaseId].slice(-6, -1).map(msg => `${msg.role}: ${msg.content}`).join('\n');
         const userMessage = `Context: ${chatHistory}\n\nUser question: ${message}`;
         
-        const response = await callLLM(systemPrompt, userMessage);
+        // Get the latest assistant message element for streaming
+        const chatMessages = document.getElementById('chatMessages');
+        const messageElements = chatMessages.querySelectorAll('.message.assistant');
+        const latestMessage = messageElements[messageElements.length - 1];
         
-        chatSessions[currentUseCaseId].push({
-            role: 'assistant',
-            content: response
-        });
+        if (latestMessage) {
+            // Stream the response
+            await callLLMStream(systemPrompt, userMessage, latestMessage);
+            
+            // Update the chat session with the final content
+            const lastIndex = chatSessions[currentUseCaseId].length - 1;
+            chatSessions[currentUseCaseId][lastIndex].content = latestMessage.innerHTML;
+        }
         
-        displayChatMessages(currentUseCaseId);
     } catch (error) {
         console.error('Error getting AI response:', error);
-        chatSessions[currentUseCaseId].push({
-            role: 'assistant',
-            content: 'I apologize, but I encountered an error processing your request. Please try again.'
-        });
+        // Update the last message with error
+        const lastIndex = chatSessions[currentUseCaseId].length - 1;
+        chatSessions[currentUseCaseId][lastIndex].content = 'I apologize, but I encountered an error processing your request. Please try again.';
         displayChatMessages(currentUseCaseId);
     } finally {
         // Hide loader and re-enable input
