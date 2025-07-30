@@ -63,7 +63,6 @@ async function init() {
   }
 }
 
-
 function initializeEventListeners() {
     if (isUseCaseMode) {
         setupUseCaseEventListeners();
@@ -205,57 +204,57 @@ async function generateCustomValueChain(industryName) {
     }
 }
 
-// Display value chain
+// Display value chain using SmartArt chevron structure
 function displayValueChain() {
     document.getElementById('valueChainTitle').textContent = `${currentConfig.name} Value Chain`;
     
     const stepsContainer = document.getElementById('valueChainSteps');
     stepsContainer.innerHTML = '';
     
-    // Create rows of chevrons (4 per row)
+    // Create SmartArt chevron list
+    const chevronList = document.createElement('ul');
+    chevronList.className = 'chevron-list';
+    
     const steps = currentConfig.valueChain;
-    for (let i = 0; i < steps.length; i += 4) {
-        const row = document.createElement('div');
-        row.className = 'row mb-4';
+    steps.forEach((step, stepIndex) => {
+        // Create main chevron step
+        const stepItem = document.createElement('li');
         
-        const rowSteps = steps.slice(i, i + 4);
-        rowSteps.forEach((step, index) => {
-            const col = document.createElement('div');
-            col.className = 'col-md-3';
+        // Create chevron header
+        const stepHeader = document.createElement('div');
+        stepHeader.textContent = step;
+        stepItem.appendChild(stepHeader);
+        
+        // Create use cases list
+        const useCases = currentConfig.useCases[step] || {};
+        if (Object.keys(useCases).length > 0) {
+            const useCasesList = document.createElement('ul');
             
-            // Create chevron
-            const chevron = document.createElement('div');
-            chevron.className = 'chevron';
-            chevron.textContent = step;
-            
-            col.appendChild(chevron);
-            
-            // Create use case boxes
-            const useCases = currentConfig.useCases[step] || {};
             Object.keys(useCases).forEach((useCaseKey, useCaseIndex) => {
                 const useCase = useCases[useCaseKey];
-                const useCaseBox = document.createElement('div');
-                useCaseBox.className = 'use-case-box';
-                useCaseBox.innerHTML = 'Click to reveal';
-                useCaseBox.dataset.step = step;
-                useCaseBox.dataset.useCase = typeof useCase === 'string' ? useCase : useCase.name;
-                useCaseBox.dataset.useCaseKey = useCaseKey;
-                useCaseBox.dataset.id = `${step}-${useCaseIndex}`;
+                const useCaseItem = document.createElement('li');
+                // Display the actual use case name directly
+                useCaseItem.textContent = typeof useCase === 'string' ? useCase : useCase.name;
+                useCaseItem.dataset.step = step;
+                useCaseItem.dataset.useCase = typeof useCase === 'string' ? useCase : useCase.name;
+                useCaseItem.dataset.useCaseKey = useCaseKey;
+                useCaseItem.dataset.id = `${step}-${useCaseIndex}`;
                 
-                useCaseBox.addEventListener('click', function() {
-                    revealUseCase(this);
+                useCaseItem.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Prevent event bubbling
                     openUseCaseModal(this.dataset.id, this.dataset.step, this.dataset.useCase, this.dataset.useCaseKey);
                 });
                 
-                col.appendChild(useCaseBox);
+                useCasesList.appendChild(useCaseItem);
             });
             
-            row.appendChild(col);
-        });
+            stepItem.appendChild(useCasesList);
+        }
         
-        stepsContainer.appendChild(row);
-    }
+        chevronList.appendChild(stepItem);
+    });
     
+    stepsContainer.appendChild(chevronList);
     document.getElementById('valueChainContainer').style.display = 'block';
 }
 
